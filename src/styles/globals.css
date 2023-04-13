@@ -1,0 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Happy+Monkey&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "Happy Monkey", cursive;
+}
+
+.doodle-shadow {
+  box-shadow: -4px 4px 0px 0px #000;
+}
+
+.doodle-button:active,
+.doodle-button-pressed {
+  transform: translateY(2px);
+  box-shadow: -3px 3px 0px 0px #333;
+}
