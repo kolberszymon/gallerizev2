@@ -15,8 +15,6 @@ interface Item {
 export default async function fetchItemsByIdsFromDynamoDb(
   ids: string[]
 ): Promise<Item[]> {
-  console.log(ids.map((id) => ({ id, concept: id.split("_")[0] })));
-
   const params: DocumentClient.BatchGetItemInput = {
     RequestItems: {
       [tableName]: {

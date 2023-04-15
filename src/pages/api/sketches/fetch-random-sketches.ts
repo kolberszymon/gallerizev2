@@ -71,7 +71,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       () => Math.random() - 0.5
     );
 
-    return res.setHeader("Cache-Control", "no-store").json(images);
+    return res
+      .setHeader("Cache-Control", "no-store")
+      .json({ images, validConcepts });
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }
