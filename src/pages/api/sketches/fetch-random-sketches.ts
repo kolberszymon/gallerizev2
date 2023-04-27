@@ -1,8 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import config from "@/utils/config";
-import fetchUniqueConceptKeyFromDynamoDb from "@/utils/aws/fetchUniqueConceptKeyFromDynamoDb";
-import generateUniqueIds from "@/utils/randomness/generateUniqueIds";
-import fetchItemsByIdsFromDynamoDb from "@/utils/aws/fetchItemsByIds";
+import scanDynanoDbForRecords from "@/utils/aws/scanDynanoDbForRecords";
+import shuffleProvidedImages from "@/utils/randomness/shuffleProvidedImages";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -10,6 +9,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ message: "This method is not allowed" });
     }
 
+    console.log("SERVER: Fetching random sketches...");
+
+    // Min & Max number of invalid images in the grid
     const min = 2;
     const max = 5;
 
@@ -17,18 +19,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const invalidCount = Math.floor(Math.random() * (max - min + 1)) + min;
     const validCount = config.imagesQuantity - invalidCount;
 
-    const result = await fetchUniqueConceptKeyFromDynamoDb();
+    const [items, conceptsQuantity] = await scanDynanoDbForRecords();
 
-    if (!result) {
+    if (!conceptsQuantity) {
       return res.json([]);
     }
 
-    const shuffledConcepts = Object.entries(result).sort(
+    const shuffledConcepts = Object.entries(conceptsQuantity).sort(
       () => Math.random() - 0.5
     );
 
-    const validConcepts = [];
-    const invalidConcepts = [];
+    const validConcepts: string[] = [];
+    const invalidConcepts: string[] = [];
 
     let validSum = 0;
     let invalidSum = 0;
@@ -46,25 +48,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       }
     }
 
-    // Generate unique ids for concepts, it's also an id in the database
-    const validIds = generateUniqueIds(validConcepts, result, validCount);
-    const invalidIds = generateUniqueIds(invalidConcepts, result, invalidCount);
+    const validItems = items.filter((item) =>
+      validConcepts.includes(item.concept)
+    );
+    const invalidItems = items.filter((item) =>
+      invalidConcepts.includes(item.concept)
+    );
 
-    // Fetch database object from genereated ids
-    const validItems = await fetchItemsByIdsFromDynamoDb(validIds);
-    const invalidItems = await fetchItemsByIdsFromDynamoDb(invalidIds);
-
-    // Tag validItems with valid: true
-    const validImages = validItems.map((item) => ({
-      ...item,
-      valid: true,
-    }));
-
-    // Tag invalidItems with valid: false
-    const invalidImages = invalidItems.map((item) => ({
-      ...item,
-      valid: false,
-    }));
+    const validImages = shuffleProvidedImages(validItems, validCount, true);
+    const invalidImages = shuffleProvidedImages(
+      invalidItems,
+      invalidCount,
+      false
+    );
 
     // Merge valid and invalid images and shuffle them
     const images = [...validImages, ...invalidImages].sort(

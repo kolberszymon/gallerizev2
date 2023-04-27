@@ -6,7 +6,7 @@ multiply it by 100
 so 100 outright votes equals 10000 invalidTagsCount
 */
 
-import { Image } from "@/types/Image.dto";
+import { Image } from "@/types/Image";
 import * as AWS from "aws-sdk";
 
 const accessKeyId = process.env.ACCESS_KEY_AWS as string;
@@ -22,7 +22,7 @@ AWS.config.update({
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient({ apiVersion: "2012-08-10" });
 
-async function updateImageInvalidTagsCount(item: Image, incrementBy: number) {
+async function updateSingleInvalidTagsCount(item: Image, incrementBy: number) {
   const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
     TableName: tableName,
     Key: {
@@ -38,6 +38,8 @@ async function updateImageInvalidTagsCount(item: Image, incrementBy: number) {
 
   try {
     const result = await dynamoDb.update(params).promise();
+
+    console.log("Result:", result);
     return result.Attributes;
   } catch (error) {
     console.error("Error updating item:", error);
@@ -45,12 +47,12 @@ async function updateImageInvalidTagsCount(item: Image, incrementBy: number) {
   }
 }
 
-const updateS3Items = async (items: Image[], weight: number) => {
+const updateImagesInvalidTagsCount = async (items: Image[], weight: number) => {
   try {
     for (const item of items) {
       const adjustedInvalidCount = Math.round(weight * 100);
 
-      const updatedItem = await updateImageInvalidTagsCount(
+      const updatedItem = await updateSingleInvalidTagsCount(
         item,
         adjustedInvalidCount
       );
@@ -58,8 +60,8 @@ const updateS3Items = async (items: Image[], weight: number) => {
       console.log("Updated item:", updatedItem);
     }
   } catch (error) {
-    console.error("Error updating S3 items:", error);
+    console.error("Error while updating:", error);
   }
 };
 
-export default updateS3Items;
+export default updateImagesInvalidTagsCount;

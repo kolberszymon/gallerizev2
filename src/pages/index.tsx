@@ -4,20 +4,29 @@ import DoodleButton from "@/components/DoodleButton";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import getUserCookies from "@/utils/getUserCookie";
-//@ts-ignore
-import cookieCutter from "cookie-cutter";
-import { Image as ImageType } from "@/types/Image.dto";
+import { Image as ImageType, RandomImage } from "@/types/Image";
+import { saveAnswer } from "@/utils/trials/saveAnwer";
+import {
+  unmarkImage,
+  markImage,
+  resetMarkedImages,
+} from "@/utils/markingImages";
+import { saveTrial } from "@/utils/trials/saveTrial";
+import moment from "moment";
+import { colorResponse } from "@/utils/colorResponse";
 
 const Home: NextPage = () => {
-  const [randomImages, setRandomImages] = useState<
-    { valid: boolean; id: string; stim_url: string; concept: string }[]
-  >([]);
+  const [randomImages, setRandomImages] = useState<RandomImage[]>([]);
   const [invalidIds, setInvalidIds] = useState<number[]>([]);
   const [markedImages, setMarkedImages] = useState<number[]>([]);
   const [bgColor, setBgColor] = useState<
     "bg-white" | "bg-red-200" | "bg-green-200" | "bg-yellow-200"
   >("bg-white");
   const [validConcepts, setValidConcepts] = useState<string[]>([]);
+  const [clicksTime, setClicksTime] = useState<{
+    loadTime: number;
+    firstClick: number;
+  }>({ loadTime: 0, firstClick: 0 });
 
   const drawImages = async () => {
     const images = await fetch(`/api/sketches/fetch-random-sketches`, {
@@ -33,97 +42,41 @@ const Home: NextPage = () => {
     setRandomImages(json);
     setInvalidIds(
       json
-        .map((image: ImageType & { valid: boolean }, i: number) => {
+        .map((image: ImageType, i: number) => {
           if (!image.valid) return i;
         })
-        .filter((i: any) => i !== undefined && i !== null)
+        .filter((i: any) => i)
     );
-  };
-
-  const saveAnswer = async () => {
-    const taggedImages = randomImages
-      .map((image, i) => {
-        if (markedImages.includes(i)) {
-          return image;
-        }
-      })
-      .filter((i) => i !== undefined);
-
-    const response = await fetch(`/api/sketches/save-answer`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        cookie: `user-id=${
-          getUserCookies().userId
-        }, gallerize-user-id-weight=${cookieCutter.get(
-          "gallerize-user-id-weight"
-        )}'`,
-      },
-      body: JSON.stringify({
-        taggedImages,
-        invalidIdsCount: invalidIds.length,
-      }),
-    });
-
-    const { penalty, reward } = await response.json();
-
-    const currentWeight = cookieCutter.get("gallerize-user-id-weight");
-
-    if (reward) {
-      if (currentWeight < 1 - reward) {
-        cookieCutter.set(
-          "gallerize-user-id-weight",
-          Number(currentWeight) + Number(reward)
-        );
-      } else {
-        cookieCutter.set("gallerize-user-id-weight", 1);
-      }
-    } else {
-      cookieCutter.set("gallerize-user-id-weight", currentWeight * penalty);
-    }
-  };
-
-  const unmarkImage = (index: number) => {
-    setMarkedImages((prev) => prev.filter((i) => i !== index));
-  };
-
-  const markImage = (index: number) => {
-    setMarkedImages((prev) => [...prev, index]);
-  };
-
-  const resetMarkedImages = () => {
-    setMarkedImages([]);
-  };
-
-  const colorResponse = () => {
-    if (invalidIds.sort().join(",") === markedImages.sort().join(",")) {
-      return "bg-green-200";
-    }
-
-    console.log(markedImages.length > invalidIds.length);
-
-    if (
-      markedImages.sort().join(",").includes(invalidIds.sort().join(",")) &&
-      markedImages.length > invalidIds.length
-    ) {
-      return "bg-yellow-200";
-    }
-
-    return "bg-red-200";
+    setClicksTime({ loadTime: moment().valueOf(), firstClick: 0 });
   };
 
   const updateBgColorFor1Sec = () => {
-    setBgColor(colorResponse());
+    setBgColor(colorResponse(invalidIds, markedImages));
 
     setTimeout(() => {
       setBgColor("bg-white");
     }, 1000);
   };
 
+  const prepareNextTrial = () => {
+    saveAnswer(randomImages, markedImages, invalidIds);
+    saveTrial(clicksTime, randomImages, markedImages);
+    updateBgColorFor1Sec();
+    resetMarkedImages(setMarkedImages);
+    drawImages();
+  };
+
+  // Initial load
   useEffect(() => {
     getUserCookies();
     drawImages();
   }, []);
+
+  useEffect(() => {
+    if (clicksTime.firstClick === 0) {
+      setClicksTime({ ...clicksTime, firstClick: moment().valueOf() });
+    }
+  }, [markedImages]);
 
   return (
     <>
@@ -156,7 +109,7 @@ const Home: NextPage = () => {
                   className="bg-red-200 rounded-md border-2 border-red-500 doodle-shadow relative h-[70px] w-[70px] doodle-button"
                   key={i}
                   onClick={() => {
-                    unmarkImage(i);
+                    unmarkImage(setMarkedImages, i);
                   }}
                 >
                   <Image
@@ -173,7 +126,7 @@ const Home: NextPage = () => {
                 className="bg-white border border-black rounded-md doodle-shadow relative h-[70px] w-[70px] doodle-button"
                 key={i}
                 onClick={() => {
-                  markImage(i);
+                  markImage(setMarkedImages, i);
                 }}
               >
                 <Image
@@ -187,23 +140,7 @@ const Home: NextPage = () => {
             );
           })}
         </div>
-        <DoodleButton
-          onClick={() => {
-            saveAnswer();
-            updateBgColorFor1Sec();
-            resetMarkedImages();
-            drawImages();
-          }}
-        >
-          Next
-        </DoodleButton>
-        {/* <div className="text-center flex flex-col">
-        <p>Please categorise if the image is valid or invalid</p>
-        <p>
-          In order to do so, you can either press the buttons by mouse or
-          keyboard
-        </p>
-      </div> */}
+        <DoodleButton onClick={prepareNextTrial}>Next</DoodleButton>
       </main>
     </>
   );

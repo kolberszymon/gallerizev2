@@ -1,4 +1,6 @@
+import { Item } from "@/types/Item";
 import * as AWS from "aws-sdk";
+import { ItemList } from "aws-sdk/clients/dynamodb";
 
 // Initialize env variables
 const accessKeyId = process.env.ACCESS_KEY_AWS as string;
@@ -16,10 +18,12 @@ AWS.config.update({
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient({ apiVersion: "2012-08-10" });
 
-export default async function fetchUniqueConceptKeyFromDynamoDb() {
+export default async function scanDynanoDbForRecords(): Promise<
+  [Item[], { [key: string]: number }]
+> {
   const params: AWS.DynamoDB.DocumentClient.ScanInput = {
     TableName: tableName,
-    ProjectionExpression: "concept",
+    ProjectionExpression: "concept, id, stim_url",
   };
 
   try {
@@ -41,8 +45,9 @@ export default async function fetchUniqueConceptKeyFromDynamoDb() {
 
     // console.log(conceptCount);
 
-    return conceptCount;
+    return [(result.Items as Item[]) || [], conceptCount];
   } catch (err) {
     console.error("Error saving item to DynamoDB:", err);
+    return [[], {}];
   }
 }

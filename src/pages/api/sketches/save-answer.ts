@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import Cookies from "cookies";
 import config from "@/utils/config";
-import updateS3Items from "@/utils/aws/updateItems";
+import updateImagesInvalidTagsCount from "@/utils/aws/updateImagesInvalidTagsCount";
 import getCookies from "@/utils/getCookies";
 
 // Best way to weight the output is to multiply gallerize-user-id-weight
@@ -54,7 +54,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       penalty += (validImages.length - 1) * config.validTagPenalty;
     }
 
-    await updateS3Items(validImages, Number(userWeight) * (1 - penalty));
+    await updateImagesInvalidTagsCount(
+      validImages,
+      Number(userWeight) * (1 - penalty)
+    );
 
     return res.json({ penalty: 1 - penalty });
   } catch (error: any) {
