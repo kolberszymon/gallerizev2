@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { Trial } from "@/types/Trial.dto";
+import { Trial } from "@/types/Trial";
 import * as AWS from "aws-sdk";
 
 const accessKeyId = process.env.ACCESS_KEY_AWS as string;
