@@ -55,7 +55,7 @@ export const saveTrial = async (
     images,
   };
 
-  const response = await fetch(`/api/trial/save-history`, {
+  await fetch(`/api/trial/save-history`, {
     method: "POST",
     headers,
     body: JSON.stringify(trial),

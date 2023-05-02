@@ -27,6 +27,7 @@ export const saveAnswer = async (
     method: "POST",
     headers,
     body: JSON.stringify({
+      randomImages,
       taggedImages,
       invalidIdsCount: invalidIds.length,
     }),

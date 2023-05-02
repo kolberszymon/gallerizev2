@@ -1,8 +1,11 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import Cookies from "cookies";
 import config from "@/utils/config";
 import updateImagesInvalidTagsCount from "@/utils/aws/updateImagesInvalidTagsCount";
-import getCookies from "@/utils/getCookies";
+import updateImagesDisplayCount from "@/utils/aws/updateImagesDisplayCount";
+import Cookies from "cookies";
+import getCookiesServer from "@/utils/getCookiesServer";
+import { updateConceptDisplayCount } from "@/utils/aws/updateConceptDisplayCount";
+import { ConceptInfo } from "@/types/ConceptInfo";
 
 // Best way to weight the output is to multiply gallerize-user-id-weight
 
@@ -19,10 +22,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.status(400).json({ message: "This method is not allowed" });
     }
 
-    // Create a cookies instance
     const cookies = new Cookies(req, res);
 
-    const { userId, userWeight } = getCookies(cookies);
+    const { userId, userWeight, selectedConcept } = getCookiesServer(cookies);
 
     if (!userId) {
       return res.status(400).json({ message: "User id not found" });
@@ -30,9 +32,19 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     let penalty = 0;
 
-    const { taggedImages, invalidIdsCount } = req.body;
+    const { randomImages, taggedImages, invalidIdsCount } = req.body;
+    const invalidConcept = new Set(
+      randomImages
+        .map((image: any) => image.concept)
+        .filter((concept: string) => concept !== selectedConcept)
+    );
 
     const validImages = taggedImages.filter((image: any) => image.valid);
+    const invalidImages = randomImages.filter((image: any) => !image.valid);
+
+    // We want to update the display count for all images and concepts ALWAYS
+    await updateImagesDisplayCount(invalidImages);
+    await updateConceptDisplayCount(Array.from(invalidConcept)[0] as string);
 
     const invalidImagesTaggedCount = taggedImages.filter(
       (image: any) => !image.valid

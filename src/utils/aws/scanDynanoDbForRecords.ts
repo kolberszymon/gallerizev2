@@ -1,53 +1,33 @@
+import { ConceptInfo } from "@/types/ConceptInfo";
 import { Item } from "@/types/Item";
-import * as AWS from "aws-sdk";
-import { ItemList } from "aws-sdk/clients/dynamodb";
+import getDynamoDb from "@/utils/globals/dynamoDb";
 
-// Initialize env variables
-const accessKeyId = process.env.ACCESS_KEY_AWS as string;
-const secretAccessKey = process.env.SECRET_KEY_AWS as string;
-const region = process.env.REGION_AWS as string;
-const tableName = process.env.TABLE_NAME as string;
+const sketchTable = process.env.TABLE_NAME as string;
+const conceptTable = process.env.CONCEPT_TABLE_NAME as string;
 
-// console.log(accessKeyId, secretAccessKey, region, tableName);
-
-AWS.config.update({
-  accessKeyId,
-  secretAccessKey,
-  region,
-});
-
-const dynamoDB = new AWS.DynamoDB.DocumentClient({ apiVersion: "2012-08-10" });
-
-export default async function scanDynanoDbForRecords(): Promise<
-  [Item[], { [key: string]: number }]
+export default async function scanDynamoDbForRecords(): Promise<
+  [Item[], ConceptInfo[]]
 > {
-  const params: AWS.DynamoDB.DocumentClient.ScanInput = {
-    TableName: tableName,
+  const sketchesParams: AWS.DynamoDB.DocumentClient.ScanInput = {
+    TableName: sketchTable,
     ProjectionExpression: "concept, id, stim_url",
   };
 
+  const conceptsParams: AWS.DynamoDB.DocumentClient.ScanInput = {
+    TableName: conceptTable,
+    ProjectionExpression: "concept_name, display_count",
+  };
+
   try {
-    const result = await dynamoDB.scan(params).promise();
+    const sketchesResult = await getDynamoDb().scan(sketchesParams).promise();
+    const conceptResults = await getDynamoDb().scan(conceptsParams).promise();
 
-    // count items in every concept
-    const conceptCount: { [key: string]: number } = result.Items?.reduce(
-      (acc: any, item: any) => {
-        const concept = item.concept;
-        if (acc[concept]) {
-          acc[concept] += 1;
-        } else {
-          acc[concept] = 1;
-        }
-        return acc;
-      },
-      {}
-    );
-
-    // console.log(conceptCount);
-
-    return [(result.Items as Item[]) || [], conceptCount];
+    return [
+      (sketchesResult.Items as Item[]) || [],
+      (conceptResults.Items as ConceptInfo[]) || [],
+    ];
   } catch (err) {
     console.error("Error saving item to DynamoDB:", err);
-    return [[], {}];
+    return [[], []];
   }
 }

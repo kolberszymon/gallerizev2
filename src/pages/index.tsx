@@ -1,11 +1,10 @@
-import { Navbar } from "@/components/Navbar";
 import type { NextPage } from "next";
 import DoodleButton from "@/components/DoodleButton";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import getUserCookies from "@/utils/getUserCookie";
 import { Image as ImageType, RandomImage } from "@/types/Image";
-import { saveAnswer } from "@/utils/trials/saveAnwer";
+import { saveAnswer } from "@/utils/trials/saveAnswer";
 import {
   unmarkImage,
   markImage,
@@ -22,26 +21,27 @@ const Home: NextPage = () => {
   const [bgColor, setBgColor] = useState<
     "bg-white" | "bg-red-200" | "bg-green-200" | "bg-yellow-200"
   >("bg-white");
-  const [validConcepts, setValidConcepts] = useState<string[]>([]);
+  const [validConcept, setValidConcept] = useState<string>("");
+  const [invalidConcept, setInvalidConcept] = useState<string>("");
   const [clicksTime, setClicksTime] = useState<{
     loadTime: number;
     firstClick: number;
   }>({ loadTime: 0, firstClick: 0 });
 
   const drawImages = async () => {
-    const images = await fetch(`/api/sketches/fetch-random-sketches`, {
+    const response = await fetch(`/api/sketches/fetch-random-sketches`, {
       cache: "no-cache",
       headers: {
         cookie: `user-id=${getUserCookies().userId}`,
       },
     });
-    const { images: json, validConcepts } = await images.json();
+    const { allImages, validConcept } = await response.json();
 
-    setValidConcepts(validConcepts);
+    setValidConcept(validConcept);
 
-    setRandomImages(json);
+    setRandomImages(allImages);
     setInvalidIds(
-      json
+      allImages
         .map((image: ImageType, i: number) => {
           if (!image.valid) return i;
         })
@@ -80,25 +80,18 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <Navbar />
       <main
         className={`${bgColor} w-full h-screen flex flex-col items-center justify-center gap-10 transition-all`}
       >
         <div className="flex flex-col gap-5 items-center">
           <p className="[word-spacing:3px] text-center">
-            Please tag all images that{" "}
-            <span className="text-red-500">DOES NOT </span>
-            contain
+            Please tag any image that is{" "}
+            <span className="text-red-500"> NOT </span>
+            a
             <br />
           </p>
           <div className="flex">
-            {validConcepts.map((concept, i) => {
-              return (
-                <p className="font-bold" key={concept}>
-                  {concept}
-                </p>
-              );
-            })}
+            {validConcept && <p className="font-bold">{validConcept}</p>}
           </div>
         </div>
         <div className="grid grid-cols-4 gap-5 items-center">
@@ -106,7 +99,7 @@ const Home: NextPage = () => {
             if (markedImages.includes(i)) {
               return (
                 <button
-                  className="bg-red-200 rounded-md border-2 border-red-500 doodle-shadow relative h-[70px] w-[70px] doodle-button"
+                  className="bg-red-200 rounded-md border-[3px] border-red-500  relative h-[120px] w-[120px] p-[2px]"
                   key={i}
                   onClick={() => {
                     unmarkImage(setMarkedImages, i);
@@ -123,7 +116,7 @@ const Home: NextPage = () => {
             }
             return (
               <button
-                className="bg-white border border-black rounded-md doodle-shadow relative h-[70px] w-[70px] doodle-button"
+                className="bg-white border-[3px] border-gray-400 rounded-md relative h-[120px] w-[120px] p-[2px]"
                 key={i}
                 onClick={() => {
                   markImage(setMarkedImages, i);

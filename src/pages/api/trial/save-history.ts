@@ -84,13 +84,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const trial = req.body;
 
-    console.log(tableName);
-    console.log(trial);
-
     // Try to update existing record
     const success = await updateTrial(trial);
-
-    console.log(success);
 
     if (success) {
       return res.json({ success: true });

@@ -8,19 +8,9 @@ so 100 outright votes equals 10000 invalidTagsCount
 
 import { Image } from "@/types/Image";
 import * as AWS from "aws-sdk";
+import getDynamoDb from "@/utils/globals/dynamoDb";
 
-const accessKeyId = process.env.ACCESS_KEY_AWS as string;
-const secretAccessKey = process.env.SECRET_KEY_AWS as string;
-const region = process.env.REGION_AWS as string;
 const tableName = process.env.TABLE_NAME as string;
-
-AWS.config.update({
-  accessKeyId,
-  secretAccessKey,
-  region,
-});
-
-const dynamoDb = new AWS.DynamoDB.DocumentClient({ apiVersion: "2012-08-10" });
 
 async function updateSingleInvalidTagsCount(item: Image, incrementBy: number) {
   const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
@@ -37,7 +27,7 @@ async function updateSingleInvalidTagsCount(item: Image, incrementBy: number) {
   };
 
   try {
-    const result = await dynamoDb.update(params).promise();
+    const result = await getDynamoDb().update(params).promise();
 
     console.log("Result:", result);
     return result.Attributes;
@@ -48,6 +38,8 @@ async function updateSingleInvalidTagsCount(item: Image, incrementBy: number) {
 }
 
 const updateImagesInvalidTagsCount = async (items: Image[], weight: number) => {
+  console.log("UPDATING IMAGES INVALID TAGS COUNT...");
+
   try {
     for (const item of items) {
       const adjustedInvalidCount = Math.round(weight * 100);
@@ -56,8 +48,6 @@ const updateImagesInvalidTagsCount = async (items: Image[], weight: number) => {
         item,
         adjustedInvalidCount
       );
-
-      console.log("Updated item:", updatedItem);
     }
   } catch (error) {
     console.error("Error while updating:", error);
