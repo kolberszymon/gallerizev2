@@ -6,7 +6,8 @@ import cookieCutter from "cookie-cutter";
 export const saveAnswer = async (
   randomImages: RandomImage[],
   markedImagesIds: number[],
-  invalidIds: number[]
+  invalidIds: number[],
+  invalidConcept: string
 ) => {
   const taggedImages = randomImages
     .map((image, i) => {
@@ -30,6 +31,7 @@ export const saveAnswer = async (
       randomImages,
       taggedImages,
       invalidIdsCount: invalidIds.length,
+      invalidConcept,
     }),
   });
 

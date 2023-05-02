@@ -21,7 +21,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const { selectedConcept } = getCookiesServer(cookies);
 
-    // Calculate the number of invalid and valid images
+    // // Calculate the number of invalid and valid images
     const invalidCount = chance.weighted([0, 1, 2], [0.25, 0.5, 0.25]);
     const validCount = config.imagesQuantity - invalidCount;
 
@@ -44,12 +44,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       validConcept = selectedConcept;
     }
 
-    console.log("Number of invalid images: ", invalidCount);
-    console.log("Valid Concept: ", validConcept);
-
     invalidConcept = getRandomWeightedConcept(conceptsQuantity, validConcept);
 
-    console.log("Invalid Concept: ", invalidConcept);
+    console.log("Number of invalid images: ", invalidCount);
+    console.log("Valid Concept: ", validConcept);
+    console.log("Invalid concept: ", invalidConcept);
+    console.log("--------------------");
 
     const validItems = items.filter((item) => validConcept === item.concept);
     const invalidItems = items.filter(

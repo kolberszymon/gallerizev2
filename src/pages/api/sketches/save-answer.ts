@@ -32,19 +32,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     let penalty = 0;
 
-    const { randomImages, taggedImages, invalidIdsCount } = req.body;
-    const invalidConcept = new Set(
-      randomImages
-        .map((image: any) => image.concept)
-        .filter((concept: string) => concept !== selectedConcept)
-    );
+    const { randomImages, taggedImages, invalidIdsCount, invalidConcept } =
+      req.body;
 
     const validImages = taggedImages.filter((image: any) => image.valid);
     const invalidImages = randomImages.filter((image: any) => !image.valid);
 
-    // We want to update the display count for all images and concepts ALWAYS
+    // We want to update the display count for all invalid images and concepts ALWAYS
+    // we don't want to update valid ones because it will be too spamy
     await updateImagesDisplayCount(invalidImages);
-    await updateConceptDisplayCount(Array.from(invalidConcept)[0] as string);
+    await updateConceptDisplayCount(invalidConcept);
 
     const invalidImagesTaggedCount = taggedImages.filter(
       (image: any) => !image.valid

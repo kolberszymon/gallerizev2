@@ -35,9 +35,10 @@ const Home: NextPage = () => {
         cookie: `user-id=${getUserCookies().userId}`,
       },
     });
-    const { allImages, validConcept } = await response.json();
+    const { allImages, validConcept, invalidConcept } = await response.json();
 
     setValidConcept(validConcept);
+    setInvalidConcept(invalidConcept);
 
     setRandomImages(allImages);
     setInvalidIds(
@@ -59,7 +60,7 @@ const Home: NextPage = () => {
   };
 
   const prepareNextTrial = () => {
-    saveAnswer(randomImages, markedImages, invalidIds);
+    saveAnswer(randomImages, markedImages, invalidIds, invalidConcept);
     saveTrial(clicksTime, randomImages, markedImages);
     updateBgColorFor1Sec();
     resetMarkedImages(setMarkedImages);

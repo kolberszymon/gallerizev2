@@ -57,6 +57,8 @@ async function createTrial(trial: Trial) {
       {
         firstClickTime: trial.firstClickTime,
         lastClickTime: trial.lastClickTime,
+        validConcept: trial.validConcept,
+        invalidConcept: trial.invalidConcept,
         images: trial.images,
       },
     ],

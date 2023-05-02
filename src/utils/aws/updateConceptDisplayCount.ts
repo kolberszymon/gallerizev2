@@ -4,6 +4,8 @@ import getDynamoDb from "@/utils/globals/dynamoDb";
 const conceptTableName = process.env.CONCEPT_TABLE_NAME as string;
 
 export async function updateConceptDisplayCount(concept_name: string) {
+  console.log("UPDATING CONCEPT DISPLAY COUNT...");
+
   const params: AWS.DynamoDB.DocumentClient.UpdateItemInput = {
     TableName: conceptTableName,
     Key: {
@@ -19,13 +21,14 @@ export async function updateConceptDisplayCount(concept_name: string) {
 
     return result.Attributes;
   } catch (error) {
-    console.error("Error updating item:", error);
+    console.error("Error updating concepts item:", error);
     throw error;
   }
 }
 
 const updateConceptsDisplayCount = async (concepts: string[]) => {
   console.log("UPDATING CONCEPT DISPLAY COUNT...");
+  console.log(concepts);
 
   try {
     for (const concept of concepts) {
