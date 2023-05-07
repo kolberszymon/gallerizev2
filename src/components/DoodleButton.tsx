@@ -5,6 +5,7 @@ interface DoodleButtonProps {
   arrowTrigger?: Array<"ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight">;
   onClick?: () => void;
   children?: ReactNode;
+  disabled?: boolean;
 }
 
 const DoodleButton: FC<DoodleButtonProps> = ({
@@ -12,6 +13,7 @@ const DoodleButton: FC<DoodleButtonProps> = ({
   arrowTrigger,
   onClick,
   children,
+  disabled = false,
 }) => {
   const [isActive, setIsActive] = useState(false);
 
@@ -52,6 +54,7 @@ const DoodleButton: FC<DoodleButtonProps> = ({
         isActive ? "doodle-button-pressed" : ""
       } p-4 bg-white doodle-shadow rounded-md hover:bg-gray-200 relative doodle-button flex flex-col items-center justify-center border border-black`}
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
       {underLabel && (

@@ -1,17 +1,24 @@
 import { RandomImage } from "@/types/Image";
 import getUserCookies from "@/utils/getUserCookie";
+import { Concepts } from "@/types/Concepts";
 //@ts-ignore
 import cookieCutter from "cookie-cutter";
 
 export const saveAnswer = async (
   randomImages: RandomImage[],
-  markedImagesIds: number[],
-  invalidIds: number[],
-  invalidConcept: string
+  concepts: Concepts
 ) => {
+  const invalidIds = randomImages
+    .map((image, i) => {
+      if (!image.valid) {
+        return i;
+      }
+    })
+    .filter((i) => i);
+
   const taggedImages = randomImages
     .map((image, i) => {
-      if (markedImagesIds.includes(i)) {
+      if (image.selected) {
         return image;
       }
     })
@@ -31,7 +38,7 @@ export const saveAnswer = async (
       randomImages,
       taggedImages,
       invalidIdsCount: invalidIds.length,
-      invalidConcept,
+      concepts,
     }),
   });
 

@@ -1,142 +1,67 @@
 import type { NextPage } from "next";
-import DoodleButton from "@/components/DoodleButton";
-import Image from "next/image";
 import { useEffect, useState } from "react";
-import getUserCookies from "@/utils/getUserCookie";
-import { Image as ImageType, RandomImage } from "@/types/Image";
-import { saveAnswer } from "@/utils/trials/saveAnswer";
-import {
-  unmarkImage,
-  markImage,
-  resetMarkedImages,
-} from "@/utils/markingImages";
-import { saveTrial } from "@/utils/trials/saveTrial";
-import moment from "moment";
-import { colorResponse } from "@/utils/colorResponse";
+import { motion } from "framer-motion";
+import { useRouter } from "next/router";
+
+// Pages
+const instructions = [
+  {
+    title: "Welcome to the gallerize!",
+    content:
+      "Gallerize is a project aimed at understanding how people perceive and interpret images. In this game, you will be presented with a series of images and asked to determine whether they represent a given concept (e.g., ball) in a valid or invalid way.",
+  },
+  {
+    title: "Purpose",
+    content:
+      "Carefully examine each image and determine whether it represents the given concept (e.g., ball) in a valid or invalid way. If you think an image is invalid, click or tap on it to select it. If you think an image is valid, do not select it.",
+  },
+  {
+    title: "How to play",
+    content:
+      "Once you have selected two images that you believe are invalid, submit your choices. The game will then tell you whether your selections were correct or not. If you selected both invalid images, you win the game. If you selected one or no invalid images, you lose the game and can try again.",
+  },
+];
 
 const Home: NextPage = () => {
-  const [randomImages, setRandomImages] = useState<RandomImage[]>([]);
-  const [invalidIds, setInvalidIds] = useState<number[]>([]);
-  const [markedImages, setMarkedImages] = useState<number[]>([]);
-  const [bgColor, setBgColor] = useState<
-    "bg-white" | "bg-red-200" | "bg-green-200" | "bg-yellow-200"
-  >("bg-white");
-  const [validConcept, setValidConcept] = useState<string>("");
-  const [invalidConcept, setInvalidConcept] = useState<string>("");
-  const [clicksTime, setClicksTime] = useState<{
-    loadTime: number;
-    firstClick: number;
-  }>({ loadTime: 0, firstClick: 0 });
+  const [currentInstruction, setCurrentInstruction] = useState<number>(0);
+  const router = useRouter();
 
-  const drawImages = async () => {
-    const response = await fetch(`/api/sketches/fetch-random-sketches`, {
-      cache: "no-cache",
-      headers: {
-        cookie: `user-id=${getUserCookies().userId}`,
-      },
-    });
-    const { allImages, validConcept, invalidConcept } = await response.json();
-
-    setValidConcept(validConcept);
-    setInvalidConcept(invalidConcept);
-
-    setRandomImages(allImages);
-    setInvalidIds(
-      allImages
-        .map((image: ImageType, i: number) => {
-          if (!image.valid) return i;
-        })
-        .filter((i: any) => i)
-    );
-    setClicksTime({ loadTime: moment().valueOf(), firstClick: 0 });
-  };
-
-  const updateBgColorFor1Sec = () => {
-    setBgColor(colorResponse(invalidIds, markedImages));
-
-    setTimeout(() => {
-      setBgColor("bg-white");
-    }, 1000);
-  };
-
-  const prepareNextTrial = () => {
-    saveAnswer(randomImages, markedImages, invalidIds, invalidConcept);
-    saveTrial(clicksTime, randomImages, markedImages);
-    updateBgColorFor1Sec();
-    resetMarkedImages(setMarkedImages);
-    drawImages();
-  };
-
-  // Initial load
-  useEffect(() => {
-    getUserCookies();
-    drawImages();
-  }, []);
-
-  useEffect(() => {
-    if (clicksTime.firstClick === 0) {
-      setClicksTime({ ...clicksTime, firstClick: moment().valueOf() });
+  const buttonAction = () => {
+    if (currentInstruction === instructions.length - 1) {
+      router.push("/game");
+    } else {
+      setCurrentInstruction((prev) => prev + 1);
     }
-  }, [markedImages]);
+  };
 
   return (
-    <>
-      <main
-        className={`${bgColor} w-full h-screen flex flex-col items-center justify-center gap-10 transition-all`}
+    <main
+      className={`w-full h-screen flex flex-col items-center justify-center gap-10 transition-all relative bg-yellow-400`}
+    >
+      <motion.div
+        key={currentInstruction}
+        className="w-1/2 h-1/2 flex flex-col items-center justify-center gap-10 "
+        initial={{ opacity: 0, x: 100 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -100 }}
+        transition={{ duration: 0.5 }}
       >
-        <div className="flex flex-col gap-5 items-center">
-          <p className="[word-spacing:3px] text-center">
-            Please tag any image that is{" "}
-            <span className="text-red-500"> NOT </span>
-            a
-            <br />
-          </p>
-          <div className="flex">
-            {validConcept && <p className="font-bold">{validConcept}</p>}
-          </div>
-        </div>
-        <div className="grid grid-cols-4 gap-5 items-center">
-          {randomImages.map((image, i) => {
-            if (markedImages.includes(i)) {
-              return (
-                <button
-                  className="bg-red-200 rounded-md border-[3px] border-red-500  relative h-[120px] w-[120px] p-[2px]"
-                  key={i}
-                  onClick={() => {
-                    unmarkImage(setMarkedImages, i);
-                  }}
-                >
-                  <Image
-                    src={image.stim_url}
-                    fill
-                    alt="Doodle"
-                    className="rounded-md"
-                  />
-                </button>
-              );
-            }
-            return (
-              <button
-                className="bg-white border-[3px] border-gray-400 rounded-md relative h-[120px] w-[120px] p-[2px]"
-                key={i}
-                onClick={() => {
-                  markImage(setMarkedImages, i);
-                }}
-              >
-                <Image
-                  src={image.stim_url}
-                  fill
-                  alt="Doodle"
-                  sizes=""
-                  className="rounded-md"
-                />
-              </button>
-            );
-          })}
-        </div>
-        <DoodleButton onClick={prepareNextTrial}>Next</DoodleButton>
-      </main>
-    </>
+        <h2 className="text-4xl font-bold">
+          {instructions[currentInstruction].title}
+        </h2>
+        <p className="text-center">
+          {instructions[currentInstruction].content}
+        </p>
+      </motion.div>
+
+      <button className="pushable bg-green-500">
+        <span className="front" onClick={buttonAction}>
+          {currentInstruction === instructions.length - 1
+            ? "Start the game"
+            : "Next"}
+        </span>
+      </button>
+    </main>
   );
 };
 

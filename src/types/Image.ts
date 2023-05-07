@@ -12,4 +12,5 @@ export type RandomImage = {
   id: string;
   stim_url: string;
   concept: string;
+  selected?: boolean;
 };

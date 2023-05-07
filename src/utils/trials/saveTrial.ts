@@ -1,6 +1,7 @@
 import { RandomImage } from "@/types/Image";
 import getUserCookies from "@/utils/getUserCookie";
 import moment from "moment";
+import { Concepts } from "@/types/Concepts";
 
 type Clicks = {
   loadTime: number;
@@ -10,7 +11,7 @@ type Clicks = {
 export const saveTrial = async (
   clicks: Clicks,
   randomImages: RandomImage[],
-  markedImagesIds: number[]
+  concepts: Concepts
 ) => {
   const { userId, userWeight } = getUserCookies();
 
@@ -23,6 +24,14 @@ export const saveTrial = async (
   } else {
     firstClickTime = moment(firstClick).diff(moment(loadTime));
   }
+
+  const markedImagesIds = randomImages
+    .map((image, i) => {
+      if (image.selected) {
+        return i;
+      }
+    })
+    .filter((i) => i);
 
   const lastClickTime = moment().diff(moment(loadTime));
 
@@ -53,7 +62,10 @@ export const saveTrial = async (
     firstClickTime,
     lastClickTime,
     images,
+    concepts,
   };
+
+  console.log(trial);
 
   await fetch(`/api/trial/save-history`, {
     method: "POST",

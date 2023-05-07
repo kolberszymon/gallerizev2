@@ -5,7 +5,7 @@ import updateImagesDisplayCount from "@/utils/aws/updateImagesDisplayCount";
 import Cookies from "cookies";
 import getCookiesServer from "@/utils/getCookiesServer";
 import { updateConceptDisplayCount } from "@/utils/aws/updateConceptDisplayCount";
-import { ConceptInfo } from "@/types/ConceptInfo";
+import { Concepts } from "@/types/Concepts";
 
 // Best way to weight the output is to multiply gallerize-user-id-weight
 
@@ -24,7 +24,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const cookies = new Cookies(req, res);
 
-    const { userId, userWeight, selectedConcept } = getCookiesServer(cookies);
+    const { userId, userWeight } = getCookiesServer(cookies);
 
     if (!userId) {
       return res.status(400).json({ message: "User id not found" });
@@ -32,8 +32,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     let penalty = 0;
 
-    const { randomImages, taggedImages, invalidIdsCount, invalidConcept } =
-      req.body;
+    const { randomImages, taggedImages, invalidIdsCount, concepts } = req.body;
+
+    console.log("SELECTED CONCEPT", concepts.validConcept);
 
     const validImages = taggedImages.filter((image: any) => image.valid);
     const invalidImages = randomImages.filter((image: any) => !image.valid);
@@ -41,7 +42,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // We want to update the display count for all invalid images and concepts ALWAYS
     // we don't want to update valid ones because it will be too spamy
     await updateImagesDisplayCount(invalidImages);
-    await updateConceptDisplayCount(invalidConcept);
+    await updateConceptDisplayCount(concepts.invalidConcept);
+    await updateConceptDisplayCount(concepts.invalidConcept);
 
     const invalidImagesTaggedCount = taggedImages.filter(
       (image: any) => !image.valid

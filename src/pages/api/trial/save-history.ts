@@ -19,6 +19,8 @@ async function updateTrial(trial: Trial) {
   const updateItem = {
     firstClickTime: trial.firstClickTime,
     lastClickTime: trial.lastClickTime,
+    validConcept: trial.concepts.validConcept,
+    invalidConcept: trial.concepts.invalidConcept,
     images: trial.images,
   };
 
@@ -57,8 +59,8 @@ async function createTrial(trial: Trial) {
       {
         firstClickTime: trial.firstClickTime,
         lastClickTime: trial.lastClickTime,
-        validConcept: trial.validConcept,
-        invalidConcept: trial.invalidConcept,
+        validConcept: trial.concepts.validConcept,
+        invalidConcept: trial.concepts.invalidConcept,
         images: trial.images,
       },
     ],
@@ -85,6 +87,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const trial = req.body;
+
+    console.log(trial);
 
     // Try to update existing record
     const success = await updateTrial(trial);

@@ -17,3 +17,53 @@ body {
   transform: translateY(2px);
   box-shadow: -3px 3px 0px 0px #333;
 }
+
+.curtain {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 0;
+  background-color: rgb(250 204 21 / var(--tw-bg-opacity));
+  z-index: 50;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 500ms;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+.curtain.active {
+  height: 100vh;
+}
+
+.curtain p {
+  display: none;
+}
+
+.curtain.active p {
+  display: flex;
+}
+
+.pushable {
+  background: rgb(23 87 46 / var(--tw-bg-opacity));
+  border-radius: 0px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline-offset: 4px;
+}
+.front {
+  display: block;
+  padding: 12px 42px;
+  border-radius: 0px;
+  font-size: 1.25rem;
+  background: rgb(34 197 94 / var(--tw-bg-opacity));
+  color: white;
+  transform: translateY(-6px);
+}
+
+.pushable:active .front {
+  transform: translateY(-2px);
+}

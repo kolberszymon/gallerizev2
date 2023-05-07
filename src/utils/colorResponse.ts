@@ -1,4 +1,22 @@
-export const colorResponse = (invalidIds: number[], markedImages: number[]) => {
+import { RandomImage } from "@/types/Image";
+
+export const colorResponse = (randomImages: RandomImage[]) => {
+  const invalidIds = randomImages
+    .map((image, i) => {
+      if (!image.valid) {
+        return i;
+      }
+    })
+    .filter((i) => i);
+
+  const markedImages = randomImages
+    .map((image, i) => {
+      if (image.selected) {
+        return i;
+      }
+    })
+    .filter((i) => i);
+
   // If user tagged all invalid images
   if (invalidIds.sort().join(",") === markedImages.sort().join(",")) {
     return "bg-green-200";
