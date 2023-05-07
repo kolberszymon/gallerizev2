@@ -134,7 +134,7 @@ const Game: NextPage = () => {
           }}
           className="absolute top-1/2 left-1/2 bg-green-500 -translate-x-1/2 -translate-y-1/2 z-[120] border-[1px] border-gray-300 p-4 rounded-md"
         >
-          Congrats, you have a good eye!
+          Congrats, you have a good eye! Keep it up!
         </motion.div>
       );
     } else if (invalidImagesCount === 0 && taggedImagesCount > 0) {
