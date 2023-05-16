@@ -1,11 +1,24 @@
 @import url("https://fonts.googleapis.com/css2?family=Happy+Monkey&display=swap");
 
+@font-face {
+  font-family: "ActionComicsBlack";
+  src: url("/fonts/ActionComicsBlack.ttf") format("ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   font-family: "Happy Monkey", cursive;
+}
+
+.comic-font-white {
+  font-family: "ActionComicsBlack";
+  filter: invert(100%);
+  -webkit-text-stroke: 2px white; /* for WebKit-based browsers */
 }
 
 .doodle-shadow {
@@ -24,7 +37,7 @@ body {
   top: 0;
   right: 0;
   height: 0;
-  background-color: rgb(250 204 21 / var(--tw-bg-opacity));
+  background-color: rgb(96 165 250 / var(--tw-bg-opacity));
   z-index: 50;
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -47,7 +60,7 @@ body {
 }
 
 .pushable {
-  background: rgb(23 87 46 / var(--tw-bg-opacity));
+  background: rgb(117 93 16 / var(--tw-bg-opacity));
   border-radius: 0px;
   border: none;
   padding: 0;
@@ -59,7 +72,7 @@ body {
   padding: 12px 42px;
   border-radius: 0px;
   font-size: 1.25rem;
-  background: rgb(34 197 94 / var(--tw-bg-opacity));
+  background-color: rgb(234 179 8 / var(--tw-bg-opacity));
   color: white;
   transform: translateY(-6px);
 }

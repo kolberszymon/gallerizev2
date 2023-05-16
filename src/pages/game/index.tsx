@@ -16,6 +16,9 @@ import {
   incorrectResponses,
   correctResponses,
 } from "@/utils/feedbackResponses";
+import { useWindowSize } from "usehooks-ts";
+import Confetti from "react-confetti";
+import areArraysEqual from "@/utils/areArraysEqual";
 
 const chance = new Chance();
 
@@ -28,7 +31,7 @@ const Game: NextPage = () => {
   });
   const [isCurtainActive, setIsCurtainActive] = useState<boolean>(true);
   const [roundEnded, setRoundEnded] = useState<boolean>(false);
-
+  const { width, height } = useWindowSize();
   const [clicksTime, setClicksTime] = useState<{
     loadTime: number;
     firstClick: number;
@@ -76,7 +79,7 @@ const Game: NextPage = () => {
     handleCurtain();
     saveAnswer(fetchedImages, concepts);
     saveTrial(clicksTime, fetchedImages, concepts);
-    updateBgColorFor1Sec();
+    // updateBgColorFor1Sec();
     drawImages();
   };
 
@@ -114,30 +117,33 @@ const Game: NextPage = () => {
   };
 
   const getRoundFeedback = (): ReactNode => {
-    const taggedImagesCount = fetchedImages.filter(
+    const taggedImages = fetchedImages.filter(
       (image) => image.selected === true
-    ).length;
+    );
 
-    const invalidImagesCount = fetchedImages.filter(
+    const invalidImages = fetchedImages.filter(
       (image) => image.valid === false
-    ).length;
+    );
 
-    if (invalidImagesCount === 0 && taggedImagesCount === 0) {
+    if (invalidImages.length === 0 && taggedImages.length === 0) {
       return (
-        <motion.div
-          initial={{ opacity: 0, y: -100, x: "-50%" }}
-          animate={{
-            opacity: 1,
-            y: 0,
-            transition: { duration: 0.5, ease: "easeOut" },
-            // Add a second animation to shake the component after it falls down
-          }}
-          className="absolute top-1/2 left-1/2 bg-green-500 -translate-x-1/2 -translate-y-1/2 z-[120] border-[1px] border-gray-300 p-4 rounded-md"
-        >
-          Congrats, you have a good eye! Keep it up!
-        </motion.div>
+        <>
+          <Confetti width={width} height={height} gravity={1} />
+          <motion.div
+            initial={{ opacity: 0, y: -100, x: "-50%" }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              transition: { duration: 0.5, ease: "easeOut" },
+              // Add a second animation to shake the component after it falls down
+            }}
+            className="absolute top-1/2 left-1/2 bg-green-500 -translate-x-1/2 -translate-y-1/2 z-[120] border-[1px] border-gray-300 p-4 rounded-md"
+          >
+            Congrats, you have a good eye! Keep it up!
+          </motion.div>
+        </>
       );
-    } else if (invalidImagesCount === 0 && taggedImagesCount > 0) {
+    } else if (invalidImages.length === 0 && taggedImages.length > 0) {
       return (
         <motion.div
           initial={{ opacity: 0, y: -100, x: "-50%" }}
@@ -152,6 +158,8 @@ const Game: NextPage = () => {
           It&apos;ll get better with practice!
         </motion.div>
       );
+    } else if (areArraysEqual(invalidImages, taggedImages)) {
+      return <Confetti width={width} height={height} gravity={1} />;
     }
   };
 
@@ -168,7 +176,9 @@ const Game: NextPage = () => {
     >
       {roundEnded && getRoundFeedback()}
       <div className={`curtain ${isCurtainActive ? "active" : ""}`}>
-        <p className="font-bold text-2xl">Get ready for the next round...</p>
+        <p className="font-bold text-2xl comic-font-white">
+          GET READY FOR THE NEXT ROUND
+        </p>
       </div>
       <div className="flex flex-col gap-5 items-center">
         <p className="[word-spacing:3px] text-center">
@@ -179,7 +189,9 @@ const Game: NextPage = () => {
         </p>
         <div className="flex">
           {concepts.validConcept && (
-            <p className="font-bold">{concepts.validConcept}</p>
+            <p className="font-bold text-2xl uppercase">
+              {concepts.validConcept.replace(/_/g, " ")}
+            </p>
           )}
         </div>
       </div>
@@ -201,14 +213,21 @@ const Game: NextPage = () => {
                   <h1>{getPromptText(i)}</h1>
                 </motion.div>
               )}
-              <button
-                className={`rounded-md border-[3px]  relative h-[120px] w-[120px] p-[2px] ${
-                  image.selected ? "border-blue-500" : "border-gray-400"
-                }`}
+              <motion.button
+                className={`rounded-md relative h-[120px] w-[120px] p-[2px] ${
+                  image.selected
+                    ? "border-blue-500 border-[5px]"
+                    : "border-gray-400 border-[3px]"
+                } `}
                 onClick={() => {
                   updateImageSelection(i);
                   setFirstClickTimeIfNotSet();
                 }}
+                whileHover={{
+                  scale: 1.1,
+                  rotate: [0, 10, -10, 0],
+                }}
+                disabled={roundEnded}
               >
                 <Image
                   src={image.stim_url}
@@ -216,7 +235,7 @@ const Game: NextPage = () => {
                   alt="Doodle"
                   className="rounded-md"
                 />
-              </button>
+              </motion.button>
             </div>
           );
         })}

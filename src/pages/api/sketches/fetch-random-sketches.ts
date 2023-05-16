@@ -64,9 +64,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     );
 
     // Merge valid and invalid images and shuffle them
-    const allImages = [...validImages, ...invalidImages].sort(
-      () => Math.random() - 0.5
-    );
+    const allImages = chance.shuffle([...validImages, ...invalidImages]);
+
+    console.log(allImages.map((image) => image.valid));
 
     return res
       .setHeader("Cache-Control", "no-store")

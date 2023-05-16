@@ -2,23 +2,22 @@ import type { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/router";
+import Image from "next/image";
 
 // Pages
 const instructions = [
   {
     title: "Welcome to the gallerize!",
-    content:
-      "Gallerize is a project aimed at understanding how people perceive and interpret images. In this game, you will be presented with a series of images and asked to determine whether they represent a given concept (e.g., ball) in a valid or invalid way.",
-  },
-  {
-    title: "Purpose",
-    content:
-      "Carefully examine each image and determine whether it represents the given concept (e.g., ball) in a valid or invalid way. If you think an image is invalid, click or tap on it to select it. If you think an image is valid, do not select it.",
+    type: "paragraphs",
+    content: [
+      "In this game, you will be shown several grids of drawings and asked to find the drawings that don’t match the word at the top of the screen.",
+      "If you think a drawing does not match the word, select the drawing by clicking on it with your mouse or tapping on it with your finger.",
+    ],
   },
   {
     title: "How to play",
-    content:
-      "Once you have selected two images that you believe are invalid, submit your choices. The game will then tell you whether your selections were correct or not. If you selected both invalid images, you win the game. If you selected one or no invalid images, you lose the game and can try again.",
+    type: "images",
+    content: ["/images/instruction1.webp", "/images/instruction2.webp"],
   },
 ];
 
@@ -36,7 +35,7 @@ const Home: NextPage = () => {
 
   return (
     <main
-      className={`w-full h-screen flex flex-col items-center justify-center gap-10 transition-all relative bg-yellow-400`}
+      className={`w-full h-screen flex flex-col items-center justify-center gap-10 transition-all relative bg-blue-400`}
     >
       <motion.div
         key={currentInstruction}
@@ -46,15 +45,34 @@ const Home: NextPage = () => {
         exit={{ opacity: 0, x: -100 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-4xl font-bold">
+        <h2 className="text-4xl font-bold comic-font-white uppercase leading-loose text-center">
           {instructions[currentInstruction].title}
         </h2>
-        <p className="text-center">
-          {instructions[currentInstruction].content}
-        </p>
+        <div className="w-[60%] flex flex-col gap-5">
+          {instructions[currentInstruction].content.map((paragraph, i) => {
+            if (instructions[currentInstruction].type === "paragraphs") {
+              return (
+                <p key={i} className="text-center text-xl">
+                  {paragraph}
+                </p>
+              );
+            } else if (instructions[currentInstruction].type === "images") {
+              console.log(paragraph);
+              return (
+                <Image
+                  key={i}
+                  src={paragraph}
+                  alt={"Instruction" + i}
+                  width={876}
+                  height={600}
+                />
+              );
+            }
+          })}
+        </div>
       </motion.div>
 
-      <button className="pushable bg-green-500">
+      <button className="pushable bg-yellow-500 mt-10">
         <span className="front" onClick={buttonAction}>
           {currentInstruction === instructions.length - 1
             ? "Start the game"
