@@ -59,19 +59,11 @@ const Game: NextPage = () => {
     setClicksTime({ loadTime: moment().valueOf(), firstClick: 0 });
   };
 
-  const updateBgColorFor1Sec = () => {
-    setBgColor(colorResponse(fetchedImages));
-
-    setTimeout(() => {
-      setBgColor("bg-white");
-    }, 1000);
-  };
-
   const showInvalidAnswers = () => {
     setRoundEnded(true);
     setTimeout(() => {
-      setRoundEnded(false);
       prepareNextTrial();
+      setRoundEnded(false);
     }, 2000);
   };
 
@@ -79,7 +71,6 @@ const Game: NextPage = () => {
     handleCurtain();
     saveAnswer(fetchedImages, concepts);
     saveTrial(clicksTime, fetchedImages, concepts);
-    // updateBgColorFor1Sec();
     drawImages();
   };
 
@@ -197,46 +188,79 @@ const Game: NextPage = () => {
       </div>
       <div className="grid grid-cols-4 gap-5 items-center">
         {fetchedImages.map((image, i) => {
-          return (
-            <div key={i} className="relative">
-              {!image.valid && roundEnded && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={
-                    roundEnded ? { opacity: 1, scale: 1.2 } : { opacity: 0 }
-                  }
-                  transition={{ duration: 0.5, type: "spring", stiffness: 300 }}
-                  className={`z-[100] text-xs absolute top-0 right-0 whitespace-nowrap border-[1px] px-2 border-gray-300 rounded-md ${
-                    image.selected ? "bg-green-500" : "bg-red-500"
-                  }`}
+          if (roundEnded) {
+            return (
+              <div key={i} className="relative">
+                {!image.valid && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={
+                      roundEnded ? { opacity: 1, scale: 1.2 } : { opacity: 0 }
+                    }
+                    transition={{
+                      duration: 0.5,
+                      type: "spring",
+                      stiffness: 300,
+                    }}
+                    className={`z-[100] text-xs absolute top-0 right-0 whitespace-nowrap border-[1px] px-2 border-gray-300 rounded-md ${
+                      image.selected ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  >
+                    <h1>{getPromptText(i)}</h1>
+                  </motion.div>
+                )}
+                <motion.button
+                  className={`rounded-md relative h-[120px] w-[120px] p-[2px] ${
+                    image.selected &&
+                    image.valid &&
+                    "border-gray-400 border-[3px]"
+                  } ${
+                    !image.selected &&
+                    !image.valid &&
+                    "border-red-500 border-[5px]"
+                  } ${
+                    image.selected &&
+                    !image.valid &&
+                    "border-green-500 border-[5px]"
+                  } ${!image.selected && "border-gray-400 border-[3px]"}`}
+                  disabled={roundEnded}
                 >
-                  <h1>{getPromptText(i)}</h1>
-                </motion.div>
-              )}
-              <motion.button
-                className={`rounded-md relative h-[120px] w-[120px] p-[2px] ${
-                  image.selected
-                    ? "border-blue-500 border-[5px]"
-                    : "border-gray-400 border-[3px]"
-                } `}
-                onClick={() => {
-                  updateImageSelection(i);
-                  setFirstClickTimeIfNotSet();
-                }}
-                whileHover={{
-                  scale: 1.1,
-                  rotate: [0, 10, -10, 0],
-                }}
-                disabled={roundEnded}
-              >
-                <Image
-                  src={image.stim_url}
-                  fill
-                  alt="Doodle"
-                  className="rounded-md"
-                />
-              </motion.button>
-            </div>
+                  <Image
+                    src={image.stim_url}
+                    fill
+                    alt="Doodle"
+                    className="rounded-md"
+                  />
+                </motion.button>
+              </div>
+            );
+          }
+
+          return (
+            <motion.button
+              key={i}
+              className={`rounded-md relative h-[120px] w-[120px] p-[2px] ${
+                image.selected
+                  ? "border-blue-500 border-[5px]"
+                  : "border-gray-400 border-[3px]"
+              } `}
+              onClick={() => {
+                updateImageSelection(i);
+                setFirstClickTimeIfNotSet();
+              }}
+              whileHover={{
+                scale: 1.1,
+                rotate: [0, 10, -10, 0],
+              }}
+              disabled={roundEnded}
+            >
+              <Image
+                src={image.stim_url}
+                fill
+                alt="Doodle"
+                className="rounded-md"
+              />
+            </motion.button>
           );
         })}
       </div>
