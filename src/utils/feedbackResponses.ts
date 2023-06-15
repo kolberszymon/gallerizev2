@@ -9,7 +9,7 @@ export const incorrectResponses = [
 export const correctResponses = [
   "You're on fire 🔥",
   "Nice job!",
-  "Impressing 🧐",
+  "Impressive 🧐",
   "Is that you, Sherlock Holmes?",
   "You're a natural!",
 ];

@@ -25,4 +25,10 @@ const getUserCookies = () => {
   return { userId, userWeight, selectedConcept };
 };
 
+export const clearUserCookies = () => {
+  cookieCutter.set("gallerize-user-id", "");
+  cookieCutter.set("gallerize-user-id-weight", "");
+  cookieCutter.set("gallerize-selected-concept", "XD");
+};
+
 export default getUserCookies;

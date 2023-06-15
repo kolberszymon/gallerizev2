@@ -22,7 +22,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { selectedConcept } = getCookiesServer(cookies);
 
     // // Calculate the number of invalid and valid images
-    const invalidCount = chance.weighted([0, 1, 2], [0.25, 0.5, 0.25]);
+    const invalidCount = chance.weighted([0, 1, 2], [0, 0, 1]);
     const validCount = config.imagesQuantity - invalidCount;
 
     const [items, conceptsQuantity] = await scanDynamoDbForRecords();
@@ -38,7 +38,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (!selectedConcept) {
       validConcept = getRandomWeightedConcept(conceptsQuantity);
       cookies.set("gallerize-selected-concept", validConcept, {
-        expires: new Date(Date.now() + 1000 * 60 * 1.5), // 1.5 minutes
+        expires: new Date(Date.now() + 1000 * 60 * 10), // 10 minutes
       });
     } else {
       validConcept = selectedConcept;

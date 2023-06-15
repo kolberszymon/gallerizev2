@@ -60,7 +60,7 @@ body {
 }
 
 .pushable {
-  background: rgb(117 93 16 / var(--tw-bg-opacity));
+  background: gray;
   border-radius: 0px;
   border: none;
   padding: 0;
@@ -72,11 +72,17 @@ body {
   padding: 12px 42px;
   border-radius: 0px;
   font-size: 1.25rem;
-  background-color: rgb(234 179 8 / var(--tw-bg-opacity));
+  background-color: white;
   color: white;
   transform: translateY(-6px);
 }
 
 .pushable:active .front {
   transform: translateY(-2px);
+}
+
+.cyberpunk-font {
+  font-family: "ActionComicsBlack";
+  text-transform: uppercase;
+  -webkit-text-stroke: 2px black; /* for WebKit-based browsers */
 }

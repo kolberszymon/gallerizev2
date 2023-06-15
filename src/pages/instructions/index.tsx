@@ -20,7 +20,6 @@ import areArraysEqual from "@/utils/areArraysEqual";
 import { useRouter } from "next/router";
 
 const chance = new Chance();
-const roundsInGame = 2;
 
 const Game: NextPage = () => {
   const [fetchedImages, setFetchedImages] = useState<RandomImage[]>([]);
@@ -35,16 +34,20 @@ const Game: NextPage = () => {
     loadTime: number;
     firstClick: number;
   }>({ loadTime: 0, firstClick: 0 });
-  const [currentRound, setCurrentRound] = useState<number>(1);
+  const [currentInstructionIndex, setCurrentInstructionIndex] =
+    useState<number>(0);
   const router = useRouter();
 
   const drawImages = async () => {
-    const response = await fetch(`/api/sketches/fetch-random-sketches`, {
-      cache: "no-cache",
-      headers: {
-        cookie: `user-id=${getUserCookies().userId}`,
-      },
-    });
+    const response = await fetch(
+      `/api/sketches/fetch-random-sketches-for-instruction`,
+      {
+        cache: "no-cache",
+        headers: {
+          cookie: `user-id=${getUserCookies().userId}`,
+        },
+      }
+    );
     const { allImages, validConcept, invalidConcept } = await response.json();
 
     setConcepts({ validConcept, invalidConcept });
@@ -61,20 +64,10 @@ const Game: NextPage = () => {
   };
 
   const showInvalidAnswers = () => {
-    setCurrentRound((round) => round + 1);
-
-    console.log("currentRound");
-    console.log(currentRound);
-
     setRoundEnded(true);
     setTimeout(() => {
-      if (currentRound < roundsInGame) {
-        prepareNextTrial();
-      } else {
-        clearUserCookies();
-      }
+      prepareNextTrial();
       setRoundEnded(false);
-      setIsCurtainActive(true);
     }, 2000);
   };
 
@@ -177,37 +170,10 @@ const Game: NextPage = () => {
       className={`bg-white w-full h-screen flex flex-col items-center justify-center gap-10 transition-all relative`}
     >
       {roundEnded && getRoundFeedback()}
-      <div
-        className={`curtain flex flex-col ${isCurtainActive ? "active" : ""}`}
-      >
-        {currentRound <= roundsInGame ? (
-          <>
-            <p className="font-bold text-2xl comic-font-white">
-              GET READY FOR THE NEXT ROUND
-            </p>
-            <p className="comic-font-white mt-10 text-2xl">
-              {currentRound} / {roundsInGame}
-            </p>
-          </>
-        ) : (
-          <>
-            <p className="font-bold text-2xl uppercase comic-font-white">
-              Thanks for playing!
-            </p>
-            <button
-              className={`pushable mt-10 cyberpunk-font ${
-                isCurtainActive ? "block" : "hidden"
-              }`}
-            >
-              <span
-                className="front border-2 border-black"
-                onClick={() => router.reload()}
-              >
-                Play again
-              </span>
-            </button>
-          </>
-        )}
+      <div className={`curtain ${isCurtainActive ? "active" : ""}`}>
+        <p className="font-bold text-2xl comic-font-white uppercase">
+          Fetching images...
+        </p>
       </div>
       <div className="flex flex-col gap-5 items-center">
         <p className="[word-spacing:3px] text-center">
@@ -215,22 +181,48 @@ const Game: NextPage = () => {
         </p>
         <div className="flex">
           {concepts.validConcept && (
-            <p className="font-bold text-3xl uppercase">
+            <p
+              className={`font-bold text-3xl uppercase ${
+                currentInstructionIndex === 0 && "border-red-500 border-4 p-1 "
+              }`}
+            >
               {concepts.validConcept.replace(/_/g, " ")}
             </p>
           )}
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-5 items-center">
-        {fetchedImages.map((image, i) => {
-          if (roundEnded) {
+      <div className="flex items-center justify-around px-10">
+        <div className="grid grid-cols-4 gap-5 items-center">
+          {fetchedImages.map((image, i) => {
+            if (roundEnded) {
+              return <div key={i} className="relative"></div>;
+            }
+
             return (
-              <div key={i} className="relative">
+              <motion.button
+                key={i}
+                className={`rounded-md relative h-[120px] w-[120px] p-[2px] ${
+                  currentInstructionIndex === 1 && !image.valid
+                    ? "border-red-500 border-[3px]"
+                    : "border-gray-400 border-[3px]"
+                } `}
+                onClick={() => {
+                  updateImageSelection(i);
+                  setFirstClickTimeIfNotSet();
+                }}
+                whileHover={{
+                  scale: 1.1,
+                  rotate: [0, 10, -10, 0],
+                }}
+                disabled={roundEnded}
+              >
                 {!image.valid && (
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={
-                      roundEnded ? { opacity: 1, scale: 1.2 } : { opacity: 0 }
+                      currentInstructionIndex === 1
+                        ? { opacity: 1, scale: 1.2 }
+                        : { opacity: 0 }
                     }
                     transition={{
                       duration: 0.5,
@@ -241,66 +233,60 @@ const Game: NextPage = () => {
                       image.selected ? "bg-green-500" : "bg-red-500"
                     }`}
                   >
-                    <h1>{getPromptText(i)}</h1>
+                    <h1>Don&apos;t belong</h1>
                   </motion.div>
                 )}
-                <motion.button
-                  className={`rounded-md relative h-[120px] w-[120px] p-[2px] ${
-                    image.selected &&
-                    image.valid &&
-                    "border-gray-400 border-[3px]"
-                  } ${
-                    !image.selected &&
-                    !image.valid &&
-                    "border-red-500 border-[5px]"
-                  } ${
-                    image.selected &&
-                    !image.valid &&
-                    "border-green-500 border-[5px]"
-                  } ${!image.selected && "border-gray-400 border-[3px]"}`}
-                  disabled={roundEnded}
-                >
-                  <Image
-                    src={image.stim_url}
-                    fill
-                    alt="Doodle"
-                    className="rounded-md"
-                  />
-                </motion.button>
-              </div>
+                <Image
+                  src={image.stim_url}
+                  fill
+                  alt="Doodle"
+                  className="rounded-md"
+                />
+              </motion.button>
             );
-          }
+          })}
+        </div>
 
-          return (
-            <motion.button
-              key={i}
-              className={`rounded-md relative h-[120px] w-[120px] p-[2px] ${
-                image.selected
-                  ? "border-blue-500 border-[5px]"
-                  : "border-gray-400 border-[3px]"
-              } `}
-              onClick={() => {
-                updateImageSelection(i);
-                setFirstClickTimeIfNotSet();
-              }}
-              whileHover={{
-                scale: 1.1,
-                rotate: [0, 10, -10, 0],
-              }}
-              disabled={roundEnded}
-            >
-              <Image
-                src={image.stim_url}
-                fill
-                alt="Doodle"
-                className="rounded-md"
-              />
-            </motion.button>
-          );
-        })}
+        {currentInstructionIndex === 0 && (
+          <p className="w-1/4 text-center text-2xl">
+            {`Most of these sketches were made by people trying to make a quick
+            sketch that looks like a ${concepts.validConcept.toUpperCase()}`}
+          </p>
+        )}
+
+        {currentInstructionIndex === 1 && (
+          <p className="w-1/4 text-center text-2xl">
+            Some of these sketches might look better than other ones, and
+            that&apos;s okay! Your job is to spot the sketches that don&apos;t
+            belong — meaning the ones that were meant to look like something
+            else.
+          </p>
+        )}
+
+        {currentInstructionIndex === 2 && (
+          <p className="w-1/4 text-center text-2xl">
+            So this game is not really about deciding which sketches &quot;look
+            good.&quot; It&apos;s really about figuring out what idea people
+            were trying to communicate with their sketch.
+          </p>
+        )}
       </div>
-      <DoodleButton disabled={roundEnded} onClick={showInvalidAnswers}>
-        Next
+
+      {currentInstructionIndex === 3 && (
+        <p className=" text-center text-2xl">Ready?</p>
+      )}
+      <DoodleButton
+        disabled={roundEnded}
+        onClick={() => {
+          if (currentInstructionIndex === 3) {
+            clearUserCookies();
+            router.push("/game");
+            return;
+          }
+          setCurrentInstructionIndex((prev) => prev + 1);
+        }}
+      >
+        {currentInstructionIndex === 3 ? "Let's go!" : "Next"}
       </DoodleButton>
     </main>
   );
