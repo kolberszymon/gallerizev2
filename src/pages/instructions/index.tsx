@@ -212,7 +212,6 @@ const Game: NextPage = () => {
                 }}
                 whileHover={{
                   scale: 1.1,
-                  rotate: [0, 10, -10, 0],
                 }}
                 disabled={roundEnded}
               >

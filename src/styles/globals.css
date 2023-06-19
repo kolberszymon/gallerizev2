@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: "ActionComicsBlack";
-  src: url("/fonts/ActionComicsBlack.ttf") format("ttf");
+  src: url("/fonts/ActionComicsBlack.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
