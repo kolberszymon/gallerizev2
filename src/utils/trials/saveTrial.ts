@@ -67,7 +67,7 @@ export const saveTrial = async (
 
   console.log(trial);
 
-  await fetch(`/api/trial/save-history`, {
+  await fetch(`/api/trial/save-history-mongo-db`, {
     method: "POST",
     headers,
     body: JSON.stringify(trial),

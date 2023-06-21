@@ -1,11 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import config from "@/utils/config";
-import updateImagesInvalidTagsCount from "@/utils/aws/updateImagesInvalidTagsCount";
-import updateImagesDisplayCount from "@/utils/aws/updateImagesDisplayCount";
+import updateImagesDisplayCount from "@/utils/mongodb/updateImagesDisplayCount";
+import { updateConceptDisplayCount } from "@/utils/mongodb/updateConceptDisplayCount";
+import updateImagesInvalidTagsCount from "@/utils/mongodb/updateImagesInvalidTagsCount";
 import Cookies from "cookies";
 import getCookiesServer from "@/utils/getCookiesServer";
-import { updateConceptDisplayCount } from "@/utils/aws/updateConceptDisplayCount";
-import { Concepts } from "@/types/Concepts";
 
 // Best way to weight the output is to multiply gallerize-user-id-weight
 

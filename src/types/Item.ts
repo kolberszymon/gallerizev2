@@ -6,4 +6,5 @@ export interface Item {
   stim_url: string;
   display_count: number;
   valid?: boolean;
+  blank: boolean;
 }

@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import config from "@/utils/config";
-import scanDynamoDbForRecords from "@/utils/aws/scanDynanoDbForRecords";
+import scanMongoDbForRecords from "@/utils/mongodb/scanMongoDbForRecords";
 import getCookiesServer from "@/utils/getCookiesServer";
 import getRandomWeightedConcept from "@/utils/randomness/getRandomConcept";
 import getRandomWeightedItems from "@/utils/randomness/getRandomItems";
@@ -25,7 +25,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const invalidCount = chance.weighted([0, 1, 2], [0.25, 0.5, 0.25]);
     const validCount = config.imagesQuantity - invalidCount;
 
-    const [items, conceptsQuantity] = await scanDynamoDbForRecords();
+    const [items, conceptsQuantity] = await scanMongoDbForRecords();
 
     if (!conceptsQuantity) {
       return res.json([]);

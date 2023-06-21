@@ -71,6 +71,8 @@ const Game: NextPage = () => {
       if (currentRound < roundsInGame) {
         prepareNextTrial();
       } else {
+        saveAnswer(fetchedImages, concepts);
+        saveTrial(clicksTime, fetchedImages, concepts);
         clearUserCookies();
       }
       setRoundEnded(false);
