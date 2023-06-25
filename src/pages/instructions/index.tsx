@@ -239,13 +239,10 @@ const Game: NextPage = () => {
         )}
       </div>
 
-      {currentInstructionIndex === 3 && (
-        <p className=" text-center text-2xl">Ready?</p>
-      )}
       <DoodleButton
         disabled={roundEnded}
         onClick={() => {
-          if (currentInstructionIndex === 3) {
+          if (currentInstructionIndex === 2) {
             clearUserCookies();
             router.push("/game");
             return;
@@ -253,7 +250,7 @@ const Game: NextPage = () => {
           setCurrentInstructionIndex((prev) => prev + 1);
         }}
       >
-        {currentInstructionIndex === 3 ? "Let's go!" : "Next"}
+        {currentInstructionIndex === 2 ? "Let's go!" : "Next"}
       </DoodleButton>
     </main>
   );

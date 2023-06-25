@@ -31,6 +31,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       return res.json([]);
     }
 
+    console.log("Here1");
+
     // Select random concept
 
     let validConcept: string, invalidConcept: string;

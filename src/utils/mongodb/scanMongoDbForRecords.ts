@@ -29,8 +29,6 @@ export default async function scanMongoDbForRecords(): Promise<
       .project(conceptsFields)
       .toArray();
 
-    console.log(inputResult);
-
     return [
       (inputResult as Item[]) || [],
       (conceptResult as ConceptInfo[]) || [],
