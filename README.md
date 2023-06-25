@@ -1,34 +1,35 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Documentation
 
-## Getting Started
+I've created tutorial videos going over how to set things up
 
-First, run the development server:
+How to set up mongodb:
+https://www.loom.com/share/f6e94cac87594924bea3f2293b39bb6a?sid=a2557fa8-bcd4-45b3-b117-17616abff690
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+How to set up vercel & frontend:
+https://www.loom.com/share/78623a371de4467aaf1349311d3d3806?sid=d27d31d2-a79a-4666-8696-7f00f5c74189
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Gallerize Utils: https://github.com/kolberszymon/gallerizeUtils
+Gallerize Project: https://github.com/kolberszymon/gallerizev2
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+In summary:
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+Mongodb:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+1. Create an account on https://www.mongodb.com/
+2. Create a cluster
+3. Add 0.0.0.0 to allowed IP list (0.0.0.0 means that every IP address is able to access it, it still need password and login to do so, therefore it's secure enough)
+4. Clone https://github.com/kolberszymon/gallerizeUtils repository
+5. Run npx ts-node src/utils/moveInputFromCSVToMongo.ts command from terminal in main folder
 
-## Learn More
+Possible configuration & tweaks:
 
-To learn more about Next.js, take a look at the following resources:
+1. Connection URI which can be found in cluster settings on mongodb.com
+2. Mongodb name which will dictate under which database will data be stored along with input and concept-info collections name, you can find which variables to set in env.example file
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Vercel:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+1. Create an account on vercel using github
+2. Fork gallerize project from https://github.com/kolberszymon/gallerizev2 repo
+3. Create a new project on vercel
+4. Add env variables which can be found in .env.example file
+5. You can also alter a few options in config.ts file
