@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import DoodleButton from "@/components/DoodleButton";
 import Image from "next/image";
 import { ReactNode, useEffect, useState } from "react";
-import getUserCookies, { clearUserCookies } from "@/utils/getUserCookie";
+import getUserCookies, { clearUserCookies } from "@/utils/common/getUserCookie";
 import { RandomImage } from "@/types/Image";
 import { saveAnswer } from "@/utils/trials/saveAnswer";
 import { saveTrial } from "@/utils/trials/saveTrial";
@@ -13,14 +13,14 @@ import Chance from "chance";
 import {
   incorrectResponses,
   correctResponses,
-} from "@/utils/feedbackResponses";
+} from "@/utils/common/feedbackResponses";
 import { useWindowSize } from "usehooks-ts";
 import Confetti from "react-confetti";
-import areArraysEqual from "@/utils/areArraysEqual";
+import areArraysEqual from "@/utils/common/areArraysEqual";
 import { useRouter } from "next/router";
+import config from "@/utils/config";
 
 const chance = new Chance();
-const roundsInGame = 2;
 
 const Game: NextPage = () => {
   const [fetchedImages, setFetchedImages] = useState<RandomImage[]>([]);
@@ -36,6 +36,7 @@ const Game: NextPage = () => {
     firstClick: number;
   }>({ loadTime: 0, firstClick: 0 });
   const [currentRound, setCurrentRound] = useState<number>(1);
+  const [loadedImagesCount, setLoadedImagesCount] = useState<number>(0);
   const router = useRouter();
 
   const drawImages = async () => {
@@ -68,7 +69,7 @@ const Game: NextPage = () => {
 
     setRoundEnded(true);
     setTimeout(() => {
-      if (currentRound < roundsInGame) {
+      if (currentRound < config.numberOfRounds) {
         prepareNextTrial();
       } else {
         saveAnswer(fetchedImages, concepts);
@@ -77,7 +78,7 @@ const Game: NextPage = () => {
       }
       setRoundEnded(false);
       setIsCurtainActive(true);
-    }, 2000);
+    }, 3000);
   };
 
   const prepareNextTrial = () => {
@@ -182,13 +183,13 @@ const Game: NextPage = () => {
       <div
         className={`curtain flex flex-col ${isCurtainActive ? "active" : ""}`}
       >
-        {currentRound <= roundsInGame ? (
+        {currentRound <= config.numberOfRounds ? (
           <>
             <p className="font-bold text-2xl comic-font-white">
               GET READY FOR THE NEXT ROUND
             </p>
             <p className="comic-font-white mt-10 text-2xl">
-              {currentRound} / {roundsInGame}
+              {currentRound} / {config.numberOfRounds}
             </p>
           </>
         ) : (
@@ -267,6 +268,10 @@ const Game: NextPage = () => {
                     fill
                     alt="Doodle"
                     className="rounded-md"
+                    onLoad={() => {
+                      console.log("Downloaded ", loadedImagesCount);
+                      setLoadedImagesCount(loadedImagesCount + 1);
+                    }}
                   />
                 </motion.button>
               </div>

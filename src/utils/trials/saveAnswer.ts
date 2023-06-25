@@ -1,5 +1,5 @@
 import { RandomImage } from "@/types/Image";
-import getUserCookies from "@/utils/getUserCookie";
+import getUserCookies from "@/utils/common/getUserCookie";
 import { Concepts } from "@/types/Concepts";
 //@ts-ignore
 import cookieCutter from "cookie-cutter";

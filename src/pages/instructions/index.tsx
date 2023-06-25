@@ -2,24 +2,15 @@ import type { NextPage } from "next";
 import DoodleButton from "@/components/DoodleButton";
 import Image from "next/image";
 import { ReactNode, useEffect, useState } from "react";
-import getUserCookies, { clearUserCookies } from "@/utils/getUserCookie";
+import getUserCookies, { clearUserCookies } from "@/utils/common/getUserCookie";
 import { RandomImage } from "@/types/Image";
-import { saveAnswer } from "@/utils/trials/saveAnswer";
-import { saveTrial } from "@/utils/trials/saveTrial";
 import moment from "moment";
 import { Concepts } from "@/types/Concepts";
 import { motion } from "framer-motion";
-import Chance from "chance";
-import {
-  incorrectResponses,
-  correctResponses,
-} from "@/utils/feedbackResponses";
 import { useWindowSize } from "usehooks-ts";
 import Confetti from "react-confetti";
-import areArraysEqual from "@/utils/areArraysEqual";
+import areArraysEqual from "@/utils/common/areArraysEqual";
 import { useRouter } from "next/router";
-
-const chance = new Chance();
 
 const Game: NextPage = () => {
   const [fetchedImages, setFetchedImages] = useState<RandomImage[]>([]);
@@ -63,21 +54,6 @@ const Game: NextPage = () => {
     setClicksTime({ loadTime: moment().valueOf(), firstClick: 0 });
   };
 
-  const showInvalidAnswers = () => {
-    setRoundEnded(true);
-    setTimeout(() => {
-      prepareNextTrial();
-      setRoundEnded(false);
-    }, 2000);
-  };
-
-  const prepareNextTrial = () => {
-    handleCurtain();
-    saveAnswer(fetchedImages, concepts);
-    saveTrial(clicksTime, fetchedImages, concepts);
-    drawImages();
-  };
-
   const handleCurtain = () => {
     setIsCurtainActive(true);
     setTimeout(() => {
@@ -100,14 +76,6 @@ const Game: NextPage = () => {
   const setFirstClickTimeIfNotSet = () => {
     if (clicksTime.firstClick === 0) {
       setClicksTime({ ...clicksTime, firstClick: moment().valueOf() });
-    }
-  };
-
-  const getPromptText = (index: number): string => {
-    if (fetchedImages[index].valid === false && fetchedImages[index].selected) {
-      return chance.pickone(correctResponses);
-    } else {
-      return chance.pickone(incorrectResponses);
     }
   };
 

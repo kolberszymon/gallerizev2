@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import config from "@/utils/config";
 import scanMongoDbForRecords from "@/utils/mongodb/scanMongoDbForRecords";
-import getCookiesServer from "@/utils/getCookiesServer";
+import getCookiesServer from "@/utils/common/getCookiesServer";
 import getRandomWeightedConcept from "@/utils/randomness/getRandomConcept";
 import getRandomWeightedItems from "@/utils/randomness/getRandomItems";
 import Cookies from "cookies";

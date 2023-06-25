@@ -4,7 +4,7 @@ import updateImagesDisplayCount from "@/utils/mongodb/updateImagesDisplayCount";
 import { updateConceptDisplayCount } from "@/utils/mongodb/updateConceptDisplayCount";
 import updateImagesInvalidTagsCount from "@/utils/mongodb/updateImagesInvalidTagsCount";
 import Cookies from "cookies";
-import getCookiesServer from "@/utils/getCookiesServer";
+import getCookiesServer from "@/utils/common/getCookiesServer";
 
 // Best way to weight the output is to multiply gallerize-user-id-weight
 

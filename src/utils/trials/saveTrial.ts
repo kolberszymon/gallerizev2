@@ -1,5 +1,5 @@
 import { RandomImage } from "@/types/Image";
-import getUserCookies from "@/utils/getUserCookie";
+import getUserCookies from "@/utils/common/getUserCookie";
 import moment from "moment";
 import { Concepts } from "@/types/Concepts";
 

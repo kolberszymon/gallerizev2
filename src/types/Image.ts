@@ -13,4 +13,5 @@ export type RandomImage = {
   stim_url: string;
   concept: string;
   selected?: boolean;
+  imageComponent: JSX.Element;
 };
