@@ -6,6 +6,7 @@ import getRandomWeightedConcept from "@/utils/randomness/getRandomConcept";
 import getRandomWeightedItems from "@/utils/randomness/getRandomItems";
 import Cookies from "cookies";
 import Chance from "chance";
+import scanMongoDbForConcepts from "@/utils/mongodb/scanMongoDbForConcepts";
 
 const chance = new Chance();
 
@@ -25,7 +26,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const invalidCount = chance.weighted([0, 1, 2], [0.25, 0.5, 0.25]);
     const validCount = config.imagesQuantity - invalidCount;
 
-    const [items, conceptsQuantity] = await scanMongoDbForRecords();
+    const conceptsQuantity = await scanMongoDbForConcepts();
 
     if (!conceptsQuantity) {
       return res.json([]);
@@ -51,9 +52,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     console.log("Invalid concept: ", invalidConcept);
     console.log("--------------------");
 
-    const validItems = items.filter((item) => validConcept === item.concept);
-    const invalidItems = items.filter(
-      (item) => invalidConcept === item.concept
+    const [validItems, invalidItems] = await scanMongoDbForRecords(
+      validConcept,
+      invalidConcept
     );
 
     const validImages = getRandomWeightedItems(validItems, validCount, true);
